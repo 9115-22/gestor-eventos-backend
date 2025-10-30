@@ -4,6 +4,7 @@ const Participant = require('../models/Participant');
 const Event = require('../models/Event');
 const nodemailer = require('nodemailer');
 
+// ✅ Configuración de correo
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: 587,
@@ -14,9 +15,9 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Registrar participante
+// ✅ Registrar participante
 router.post('/', async (req, res) => {
-  const { event, name, email } = req.body; // 👈 recibe 'event' en lugar de 'eventId'
+  const { event, name, email } = req.body;
   console.log("📥 Datos recibidos para registro:", req.body);
 
   try {
@@ -29,13 +30,14 @@ router.post('/', async (req, res) => {
     const participant = new Participant({ event, name, email });
     await participant.save();
 
-    // Enviar correo (no bloqueante)
+    // Enviar correo de confirmación
     const mailOptions = {
       from: process.env.FROM_EMAIL,
       to: email,
-      subject: `Confirmación: ${ev.title}`,
-      text: `Hola ${name},\n\nTe has registrado correctamente en "${ev.title}" que se realizará el ${ev.date}.\n\nUbicación: ${ev.location}\n\nGracias.`
+      subject: `Confirmación de registro: ${ev.title}`,
+      text: `Hola ${name},\n\nTe has registrado correctamente en "${ev.title}" que se realizará el ${new Date(ev.date).toLocaleDateString()}.\n\nUbicación: ${ev.location}\n\nGracias por participar.`
     };
+
     transporter.sendMail(mailOptions)
       .then(info => console.log("📧 Correo enviado:", info.response))
       .catch(err => console.error("❌ Error al enviar correo:", err));
@@ -47,7 +49,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Obtener participantes por evento
+// ✅ Obtener participantes por evento
 router.get('/event/:id', async (req, res) => {
   try {
     const list = await Participant.find({ event: req.params.id }).populate('event');
@@ -58,3 +60,4 @@ router.get('/event/:id', async (req, res) => {
 });
 
 module.exports = router;
+

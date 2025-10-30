@@ -37,7 +37,12 @@ router.get('/:id', async (req, res) => {
 // ✅ Editar evento
 router.put('/:id', async (req, res) => {
   try {
-    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedEvent = await Event.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedEvent) return res.status(404).json({ error: 'Evento no encontrado' });
     res.json(updatedEvent);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -47,11 +52,13 @@ router.put('/:id', async (req, res) => {
 // ✅ Eliminar evento
 router.delete('/:id', async (req, res) => {
   try {
-    await Event.findByIdAndDelete(req.params.id);
-    res.json({ msg: 'Evento eliminado' });
+    const deleted = await Event.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Evento no encontrado' });
+    res.json({ msg: 'Evento eliminado correctamente' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 module.exports = router;
+
