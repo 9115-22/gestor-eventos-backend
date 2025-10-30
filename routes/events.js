@@ -2,38 +2,56 @@ const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
 
-// Crear evento
-router.post('/', async (req,res)=>{
-  try{
+// ✅ Crear evento
+router.post('/', async (req, res) => {
+  try {
     const event = new Event(req.body);
     await event.save();
     res.status(201).json(event);
-  }catch(err){ res.status(400).json({error: err.message}); }
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// Listar eventos
-router.get('/', async (req,res)=>{
-  const events = await Event.find().sort({date:1});
-  res.json(events);
+// ✅ Listar eventos (ordenados por fecha)
+router.get('/', async (req, res) => {
+  try {
+    const events = await Event.find().sort({ date: 1 });
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Obtener detalle
-router.get('/:id', async (req,res)=>{
-  const event = await Event.findById(req.params.id);
-  if(!event) return res.status(404).json({error:'No encontrado'});
-  res.json(event);
+// ✅ Obtener detalle de evento por id
+router.get('/:id', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ error: 'Evento no encontrado' });
+    res.json(event);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Editar
-router.put('/:id', async (req,res)=>{
-  const event = await Event.findByIdAndUpdate(req.params.id, req.body, {new:true});
-  res.json(event);
+// ✅ Editar evento
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedEvent);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Eliminar
-router.delete('/:id', async (req,res)=>{
-  await Event.findByIdAndDelete(req.params.id);
-  res.json({msg:'Eliminado'});
+// ✅ Eliminar evento
+router.delete('/:id', async (req, res) => {
+  try {
+    await Event.findByIdAndDelete(req.params.id);
+    res.json({ msg: 'Evento eliminado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
