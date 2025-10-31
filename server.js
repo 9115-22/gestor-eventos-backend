@@ -6,31 +6,32 @@ const cors = require('cors');
 const app = express();
 
 // ===============================
-// Configuración CORS para Netlify + localhost
+// CORS: permitir Netlify y localhost
 // ===============================
 const allowedOrigins = [
+  "https://690410188b8b30000831f827--gestorevento.netlify.app",
   "https://gestorevento.netlify.app",
   "http://localhost:5500",
   "http://127.0.0.1:5500"
 ];
 
-app.use(cors({
-  origin: function(origin, callback) {
-    // permitir requests sin origen (como Postman o curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'El CORS no está permitido para este origen';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+// middleware CORS global
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
 
-// habilitar preflight para todas las rutas
-app.options('*', cors());
+  // responder preflight
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 // ===============================
 // Middleware
@@ -44,8 +45,8 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('✅ Conectado a MongoDB'))
-.catch(err => console.error('❌ Error al conectar MongoDB:', err));
+.then(() => console.log("✅ Conectado a MongoDB"))
+.catch(err => console.error("❌ Error al conectar MongoDB:", err));
 
 // ===============================
 // Rutas
@@ -57,7 +58,7 @@ app.use('/api/events', eventsRouter);
 app.use('/api/participants', participantsRouter);
 
 // ===============================
-// Ruta base de prueba
+// Ruta de prueba
 // ===============================
 app.get('/', (req, res) => {
   res.send('✅ Backend de Gestor de Eventos funcionando correctamente.');
