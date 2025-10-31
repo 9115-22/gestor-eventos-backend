@@ -5,10 +5,10 @@ const cors = require('cors');
 
 const app = express();
 
-// ✅ Configuración CORS compatible con Netlify + Render
+// ✅ Configuración CORS para Netlify y local
 app.use(cors({
   origin: [
-    "https://gestorevento.netlify.app",
+    "https://gestorevento.netlify.app", // tu frontend en Netlify
     /\.netlify\.app$/,
     "http://localhost:5500",
     "http://127.0.0.1:5500"
@@ -31,6 +31,7 @@ mongoose.connect(process.env.MONGO_URI, {
 // ✅ Importar rutas
 const eventsRouter = require('./routes/events');
 const participantsRouter = require('./routes/participants');
+
 app.use('/api/events', eventsRouter);
 app.use('/api/participants', participantsRouter);
 
