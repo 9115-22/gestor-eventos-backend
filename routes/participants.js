@@ -1,10 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const Participant = require('../models/Participant');
-const Event = require('../models/Event');
-const nodemailer = require('nodemailer');
+import express from 'express';
+import Participant from '../models/Participant.js';
+import Event from '../models/Event.js';
+import nodemailer from 'nodemailer';
 
-// ✅ Configuración de correo
+const router = express.Router();
+
+// Configuración de correo
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: 587,
@@ -18,14 +19,13 @@ const transporter = nodemailer.createTransport({
 // ✅ Registrar participante
 router.post('/', async (req, res) => {
   const { event, name, email } = req.body;
-  console.log("📥 Datos recibidos para registro:", req.body);
 
   try {
-    if (!event || !name || !email)
+    if(!event || !name || !email) 
       return res.status(400).json({ error: "Faltan datos: event, name o email" });
 
     const ev = await Event.findById(event);
-    if (!ev) return res.status(404).json({ error: "Evento no encontrado" });
+    if(!ev) return res.status(404).json({ error: "Evento no encontrado" });
 
     const participant = new Participant({ event, name, email });
     await participant.save();
@@ -43,8 +43,8 @@ router.post('/', async (req, res) => {
       .catch(err => console.error("❌ Error al enviar correo:", err));
 
     res.status(201).json(participant);
+
   } catch (err) {
-    console.error("❌ Error al registrar participante:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -59,5 +59,5 @@ router.get('/event/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
 
